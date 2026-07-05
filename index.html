@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chess Library Trainer</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-block">
+          <div class="brand-mark">64</div>
+          <div>
+            <h1>Chess Library Trainer</h1>
+            <p>Your collection, organized into practice.</p>
+          </div>
+        </div>
+
+        <nav class="tab-list" aria-label="Main views">
+          <button class="tab-button is-active" data-tab="dashboard" aria-pressed="true">Dashboard</button>
+          <button class="tab-button" data-tab="library" aria-pressed="false">Library</button>
+          <button class="tab-button" data-tab="train" aria-pressed="false">Train</button>
+          <button class="tab-button" data-tab="games" aria-pressed="false">Games</button>
+          <button class="tab-button" data-tab="progress" aria-pressed="false">Progress</button>
+        </nav>
+
+        <section class="sidebar-panel">
+          <h2>Daily mix</h2>
+          <div id="dailyMixMini" class="mini-list"></div>
+        </section>
+      </aside>
+
+      <main class="main">
+        <section class="topbar">
+          <div>
+            <p class="eyebrow">Local collection snapshot</p>
+            <h2 id="collectionTitle">Training academy</h2>
+          </div>
+          <div class="topbar-actions">
+            <button id="refreshPlanButton" class="icon-button" title="Refresh training mix" aria-label="Refresh training mix">↻</button>
+            <button id="resetBoardButton" class="icon-button" title="Reset board" aria-label="Reset board">♙</button>
+          </div>
+        </section>
+
+        <section id="dashboard" class="view is-active">
+          <div class="stat-grid" id="statGrid"></div>
+
+          <div class="workspace-grid">
+            <section class="panel training-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Today</p>
+                  <h3>Balanced practice</h3>
+                </div>
+                <button class="quiet-button" data-goto="train">Start</button>
+              </div>
+              <div id="dailyPlan" class="plan-list"></div>
+            </section>
+
+            <section class="panel board-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow" id="boardSource">Tactics</p>
+                  <h3 id="boardTitle">Position workspace</h3>
+                </div>
+                <div class="board-tools">
+                  <button id="prevPuzzleButton" class="icon-button" title="Previous position" aria-label="Previous position">‹</button>
+                  <button id="nextPuzzleButton" class="icon-button" title="Next position" aria-label="Next position">›</button>
+                  <button id="flipBoardButton" class="icon-button" title="Flip board" aria-label="Flip board">⇅</button>
+                </div>
+              </div>
+              <div class="board-layout">
+                <div id="chessBoard" class="chess-board" aria-label="Chess board"></div>
+                <div class="position-card">
+                  <div class="position-meta">
+                    <span id="sideToMove"></span>
+                    <span id="puzzleIndex"></span>
+                  </div>
+                  <p id="positionPrompt" class="position-prompt"></p>
+                  <div class="button-row">
+                    <button id="foundButton" class="primary-button">Found it</button>
+                    <button id="missedButton" class="secondary-button">Missed</button>
+                  </div>
+                  <button id="revealButton" class="quiet-button full-width">Reveal thinking checklist</button>
+                  <div id="thinkingChecklist" class="checklist is-hidden"></div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <section class="image-band">
+            <figure>
+              <img src="../chessthoughtprocesschecklist.png" alt="Chess thought process checklist" />
+              <figcaption>Thought-process material already in the folder can become guided prompts.</figcaption>
+            </figure>
+            <figure>
+              <img src="../thinking-chess-strategy-1.png" alt="Chess strategy note" />
+              <figcaption>Strategy notes can sit beside tactical and endgame practice.</figcaption>
+            </figure>
+          </section>
+        </section>
+
+        <section id="library" class="view">
+          <div class="filter-bar">
+            <input id="librarySearch" type="search" placeholder="Search the collection" />
+            <select id="themeFilter" aria-label="Theme filter"></select>
+            <select id="formatFilter" aria-label="Format filter"></select>
+          </div>
+          <div id="themeSummary" class="theme-summary"></div>
+          <div id="libraryList" class="library-list"></div>
+        </section>
+
+        <section id="train" class="view">
+          <div class="workspace-grid train-grid">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Queue</p>
+                  <h3>Training blocks</h3>
+                </div>
+              </div>
+              <div id="trainingBlocks" class="plan-list"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Tactics bank</p>
+                  <h3>1001 sacrifices and combinations</h3>
+                </div>
+              </div>
+              <div class="range-row">
+                <label for="puzzleJump">Position</label>
+                <input id="puzzleJump" type="range" min="1" value="1" />
+                <span id="puzzleJumpValue"></span>
+              </div>
+              <div class="button-row">
+                <button id="randomPuzzleButton" class="primary-button">Random position</button>
+                <button id="clearMarksButton" class="secondary-button">Clear marks</button>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section id="games" class="view">
+          <div class="filter-bar">
+            <input id="gameSearch" type="search" placeholder="Search players, events, ECO" />
+            <select id="gameSourceFilter" aria-label="Game source filter"></select>
+          </div>
+          <div id="gameList" class="game-list"></div>
+        </section>
+
+        <section id="progress" class="view">
+          <div id="progressGrid" class="stat-grid"></div>
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Memory</p>
+                <h3>Marked positions</h3>
+              </div>
+            </div>
+            <div id="markedPositions" class="library-list compact"></div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="./data/library-data.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
