@@ -1,18 +1,20 @@
 :root {
-  color-scheme: light;
-  --bg: #f6f4ee;
-  --surface: #fffdf8;
-  --surface-strong: #f0f6f2;
-  --ink: #1e2521;
-  --muted: #677069;
-  --line: #d8d4c8;
-  --accent: #2f6f5f;
-  --accent-strong: #1f4e46;
-  --warn: #9a5b2e;
-  --danger: #9c3d35;
-  --board-light: #eee5d0;
-  --board-dark: #6b8f75;
-  --shadow: 0 16px 35px rgba(37, 43, 38, 0.08);
+  color-scheme: dark;
+  --bg: #121212;
+  --surface: #1e1e1e;
+  --surface-strong: #2c2c2c;
+  --ink: #e0e0e0;
+  --muted: #a0a0a0;
+  --line: #3a3a3a;
+  --accent: #00b894;
+  --accent-strong: #00a383;
+  --warn: #fdcb6e;
+  --danger: #ff7675;
+  --success: #55efc4;
+  --board-light: #eeeed2;
+  --board-dark: #769656;
+  --shadow: 0 16px 35px rgba(0, 0, 0, 0.5);
+  --radius: 8px;
 }
 
 * {
@@ -49,7 +51,7 @@ button {
   gap: 22px;
   padding: 24px;
   border-right: 1px solid var(--line);
-  background: #fbfaf5;
+  background: var(--surface);
 }
 
 .brand-block {
@@ -140,7 +142,7 @@ h1 {
 .theme-pill,
 .stat-card {
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--surface);
 }
 
 .mini-item {
@@ -201,9 +203,14 @@ h1 {
   width: 40px;
   height: 40px;
   border: 1px solid var(--line);
-  background: #fff;
-  color: var(--accent-strong);
+  background: var(--surface-strong);
+  color: var(--accent);
   font-size: 1.2rem;
+}
+
+.icon-button:hover {
+  background: var(--accent);
+  color: #fff;
 }
 
 .primary-button,
@@ -220,14 +227,18 @@ h1 {
   border-color: var(--accent);
 }
 
+.primary-button:hover {
+  background: var(--accent-strong);
+}
+
 .secondary-button {
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
 }
 
 .quiet-button {
   background: var(--surface-strong);
-  color: var(--accent-strong);
+  color: var(--accent);
 }
 
 .full-width {
@@ -325,8 +336,8 @@ h1 {
   grid-template-columns: repeat(8, 1fr);
   width: min(100%, 460px);
   aspect-ratio: 1;
-  border: 2px solid #2d342f;
-  background: #2d342f;
+  border: 2px solid var(--bg-tertiary, #2c2c2c);
+  background: var(--bg-tertiary, #2c2c2c);
 }
 
 .square {
@@ -334,8 +345,14 @@ h1 {
   display: grid;
   place-items: center;
   aspect-ratio: 1;
-  font-size: clamp(1.7rem, 5vw, 3rem);
   user-select: none;
+}
+
+.piece-img {
+  width: 90%;
+  height: 90%;
+  object-fit: contain;
+  pointer-events: none;
 }
 
 .square.light {
@@ -347,7 +364,7 @@ h1 {
 }
 
 .square.is-selected {
-  outline: 4px solid #d2a83d;
+  outline: 4px solid #ffd700;
   outline-offset: -4px;
 }
 
@@ -355,9 +372,13 @@ h1 {
   position: absolute;
   left: 4px;
   bottom: 2px;
-  color: rgba(31, 37, 33, 0.55);
+  color: rgba(0, 0, 0, 0.6);
   font-size: 0.63rem;
   font-weight: 700;
+}
+
+.square.dark .coord {
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .position-card {
@@ -378,7 +399,7 @@ h1 {
   min-height: 26px;
   padding: 0 8px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--surface-strong);
   color: var(--muted);
   font-size: 0.8rem;
 }
@@ -415,7 +436,16 @@ h1 {
 .image-band figure {
   margin: 0;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--surface);
+}
+
+.placeholder-image {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 180px;
+  background: var(--surface-strong);
+  font-size: 4rem;
 }
 
 .image-band img {
@@ -423,7 +453,7 @@ h1 {
   width: 100%;
   height: 180px;
   object-fit: contain;
-  background: #f7f7f3;
+  background: var(--surface-strong);
 }
 
 .image-band figcaption {
@@ -444,7 +474,7 @@ h1 {
 .range-row input {
   min-height: 42px;
   border: 1px solid var(--line);
-  background: #fff;
+  background: var(--surface);
   color: var(--ink);
   padding: 0 12px;
 }
@@ -483,8 +513,8 @@ h1 {
   overflow: auto;
   padding: 10px;
   border: 1px solid var(--line);
-  background: #fbfaf5;
-  color: #333a35;
+  background: var(--surface-strong);
+  color: var(--ink);
   line-height: 1.45;
 }
 
@@ -542,4 +572,22 @@ h1 {
   .square {
     font-size: clamp(1.35rem, 9vw, 2.5rem);
   }
+}
+
+/* Possible move indicators */
+.square.possible-move::after {
+  content: '';
+  position: absolute;
+  width: 30%;
+  height: 30%;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+}
+
+.square.dark.possible-move::after {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.square.last-move {
+  background-color: rgba(155, 200, 50, 0.6) !important;
 }

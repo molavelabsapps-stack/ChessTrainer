@@ -1,0 +1,46 @@
+```
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.jar
+*.war
+*.class
+*.dll
+*.so
+*.dylib
+*.exe
+*.out
+
+# Build artifacts
+dist/
+build/
+target/
+*.o
+*.obj
+*.a
+*.lib
+*.pdb
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System files
+.DS_Store
+Thumbs.db
+```
