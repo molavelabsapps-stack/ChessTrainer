@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Library Trainer Test</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .pass { background: #d4edda; color: #155724; }
+        .fail { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>Chess Library Trainer - Functionality Tests</h1>
+    <div id="results"></div>
+    
+    <script src="./data/library-data.js"></script>
+    <script>
+        const results = document.getElementById('results');
+        let passCount = 0;
+        let failCount = 0;
+        
+        function test(name, condition, details = '') {
+            const div = document.createElement('div');
+            div.className = `test-result ${condition ? 'pass' : 'fail'}`;
+            div.innerHTML = `<strong>${condition ? '✓' : '✗'} ${name}</strong>${details ? `<br><small>${details}</small>` : ''}`;
+            results.appendChild(div);
+            if (condition) passCount++; else failCount++;
+        }
+        
+        // Test 1: Data loaded
+        test('Data object exists', window.CHESS_LIBRARY_DATA !== undefined);
+        
+        // Test 2: Books array
+        const data = window.CHESS_LIBRARY_DATA;
+        test('Books array exists', Array.isArray(data.books), `Found ${data.books?.length || 0} books`);
+        
+        // Test 3: Tactics array
+        test('Tactics array exists', Array.isArray(data.tactics), `Found ${data.tactics?.length || 0} tactics`);
+        
+        // Test 4: Games array
+        test('Games array exists', Array.isArray(data.games), `Found ${data.games?.length || 0} games`);
+        
+        // Test 5: Book structure
+        if (data.books && data.books.length > 0) {
+            const book = data.books[0];
+            test('Book has required fields', 
+                book.name && book.path && book.format && book.theme,
+                `Sample: ${book.name}`);
+        }
+        
+        // Test 6: Tactic structure
+        if (data.tactics && data.tactics.length > 0) {
+            const tactic = data.tactics[0];
+            test('Tactic has required fields',
+                tactic.id && tactic.fen && tactic.side,
+                `Sample ID: ${tactic.id}, FEN: ${tactic.fen?.substring(0, 50)}...`);
+        }
+        
+        // Test 7: Game structure
+        if (data.games && data.games.length > 0) {
+            const game = data.games[0];
+            test('Game has required fields',
+                game.white && game.black && game.moves,
+                `Sample: ${game.white} vs ${game.black}`);
+        }
+        
+        // Test 8: Theme diversity
+        const themes = new Set(data.books.map(b => b.theme));
+        test('Multiple themes present', themes.size >= 5, `Themes: ${Array.from(themes).join(', ')}`);
+        
+        // Test 9: Format diversity
+        const formats = new Set(data.books.map(b => b.format));
+        test('Multiple formats present', formats.size >= 2, `Formats: ${Array.from(formats).join(', ')}`);
+        
+        // Summary
+        const summary = document.createElement('div');
+        summary.className = 'test-result info';
+        summary.innerHTML = `<strong>Summary:</strong> ${passCount} passed, ${failCount} failed`;
+        results.appendChild(summary);
+    </script>
+</body>
+</html>
