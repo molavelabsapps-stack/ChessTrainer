@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Chess Library Trainer</title>
     <link rel="stylesheet" href="./styles.css" />
+    <!-- Chess.js for move validation and PGN parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <!-- PDF.js for book viewing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+      // Configure PDF.js worker
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
   </head>
   <body>
     <div class="app-shell">
@@ -106,9 +114,77 @@
             <input id="librarySearch" type="search" placeholder="Search the collection" />
             <select id="themeFilter" aria-label="Theme filter"></select>
             <select id="formatFilter" aria-label="Format filter"></select>
+            <button id="uploadPgnButton" class="primary-button" title="Upload PGN file">📁 Upload PGN</button>
+            <input type="file" id="pgnFileInput" accept=".pgn" style="display:none;" />
           </div>
           <div id="themeSummary" class="theme-summary"></div>
           <div id="libraryList" class="library-list"></div>
+          
+          <!-- Book Reader Modal -->
+          <div id="bookReaderModal" class="modal is-hidden">
+            <div class="modal-content modal-content-wide">
+              <div class="modal-header">
+                <h3 id="bookReaderTitle">Book Reader</h3>
+                <div class="reader-tools">
+                  <button id="searchInBookButton" class="icon-button" title="Search in book">🔍</button>
+                  <button id="bookmarkButton" class="icon-button" title="Add bookmark">🔖</button>
+                  <button id="highlightButton" class="icon-button" title="Toggle highlight mode">🖍️</button>
+                  <button id="annotationsButton" class="icon-button" title="View annotations">📝</button>
+                  <button id="closeBookReader" class="icon-button">×</button>
+                </div>
+              </div>
+              <div class="reader-layout">
+                <div class="pdf-container" id="pdfContainer">
+                  <canvas id="pdfCanvas"></canvas>
+                  <div class="pdf-controls">
+                    <button id="prevPageBtn" class="icon-button">‹</button>
+                    <span id="pageNumDisplay">Page 1 of -</span>
+                    <button id="nextPageBtn" class="icon-button">›</button>
+                    <input id="pageInput" type="number" min="1" value="1" style="width: 60px;" />
+                  </div>
+                  <div id="searchResultsPanel" class="search-results-panel is-hidden">
+                    <h4>Search Results</h4>
+                    <div id="searchResultsList"></div>
+                  </div>
+                  <div id="bookmarksPanel" class="bookmarks-panel is-hidden">
+                    <h4>Bookmarks</h4>
+                    <div id="bookmarksList"></div>
+                  </div>
+                  <div id="annotationsPanel" class="annotations-panel is-hidden">
+                    <h4>Annotations</h4>
+                    <div id="annotationsList"></div>
+                  </div>
+                </div>
+                <div class="epub-container is-hidden" id="epubContainer">
+                  <div id="epubViewer" class="epub-viewer"></div>
+                  <div class="epub-controls">
+                    <button id="epubPrevBtn" class="icon-button">‹</button>
+                    <span id="epubLocationDisplay">Location 1 of -</span>
+                    <button id="epubNextBtn" class="icon-button">›</button>
+                  </div>
+                  <div id="epubSearchResultsPanel" class="search-results-panel is-hidden">
+                    <h4>Search Results</h4>
+                    <div id="epubSearchResultsList"></div>
+                  </div>
+                </div>
+                <div class="board-container">
+                  <div id="chessBoardLibrary" class="chess-board small" aria-label="Chess board"></div>
+                  <div class="position-card small">
+                    <p id="libraryPositionPrompt" class="position-prompt">Load a position from the book</p>
+                    <div class="button-row">
+                      <button id="loadFenButton" class="primary-button">Load FEN</button>
+                      <button id="clearLibraryBoard" class="secondary-button">Clear</button>
+                    </div>
+                    <textarea id="fenInput" placeholder="Paste FEN here..." rows="2" class="fen-input"></textarea>
+                    <div class="annotation-tools">
+                      <textarea id="positionAnnotation" placeholder="Add notes for this position..." rows="3" class="annotation-input"></textarea>
+                      <button id="saveAnnotationButton" class="quiet-button full-width">Save Annotation</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section id="train" class="view">
@@ -147,7 +223,71 @@
             <input id="gameSearch" type="search" placeholder="Search players, events, ECO" />
             <select id="gameSourceFilter" aria-label="Game source filter"></select>
           </div>
-          <div id="gameList" class="game-list"></div>
+          <div class="workspace-grid train-grid">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">Games List</p>
+                  <h3>Browse your collection</h3>
+                </div>
+              </div>
+              <div id="gameList" class="game-list"></div>
+            </section>
+            <section class="panel board-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow" id="gameViewerTitle">Game Viewer + Analysis</p>
+                  <h3 id="gameViewerSubtitle">Select a game to view</h3>
+                </div>
+                <div class="board-tools">
+                  <button id="startAnalysisButton" class="primary-button" title="Start engine analysis" aria-label="Analyze position">Analyze</button>
+                  <button id="stopAnalysisButton" class="secondary-button" title="Stop engine analysis" aria-label="Stop analysis">Stop</button>
+                  <button id="guessTheMoveButton" class="secondary-button" title="Toggle guess the move mode" aria-label="Guess the Move">Guess the Move</button>
+                  <button id="firstMoveButton" class="icon-button" title="First move" aria-label="First move">|‹</button>
+                  <button id="prevMoveButton" class="icon-button" title="Previous move" aria-label="Previous move">‹</button>
+                  <button id="nextMoveButton" class="icon-button" title="Next move" aria-label="Next move">›</button>
+                  <button id="lastMoveButton" class="icon-button" title="Last move" aria-label="Last move">›|</button>
+                  <button id="flipBoardButton" class="icon-button" title="Flip board" aria-label="Flip board">⇅</button>
+                </div>
+              </div>
+              <div class="board-layout">
+                <div id="chessBoardGames" class="chess-board" aria-label="Chess board"></div>
+                <div class="position-card">
+                  <div class="position-meta">
+                    <span id="gameWhite"></span>
+                    <span id="gameBlack"></span>
+                    <span id="gameResult"></span>
+                  </div>
+                  <div class="game-moves-container">
+                    <div id="gameMoveList" class="game-move-list"></div>
+                  </div>
+                  <div class="engine-analysis-panel">
+                    <div class="engine-header">
+                      <strong>Stockfish Analysis</strong>
+                      <span id="analysisStatus" class="engine-status">Ready</span>
+                    </div>
+                    <div class="engine-metrics">
+                      <div class="metric">
+                        <span class="metric-label">Evaluation</span>
+                        <span id="engineEvaluation" class="metric-value">-</span>
+                      </div>
+                      <div class="metric">
+                        <span class="metric-label">Best Move</span>
+                        <span id="engineBestMove" class="metric-value">-</span>
+                      </div>
+                    </div>
+                    <div class="engine-pv">
+                      <span class="metric-label">Principal Variation:</span>
+                      <span id="enginePV" class="pv-text">-</span>
+                    </div>
+                  </div>
+                  <div class="button-row">
+                    <button id="resetGameButton" class="secondary-button">Reset Position</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
         </section>
 
         <section id="progress" class="view">
@@ -165,6 +305,10 @@
       </main>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.0/stockfish.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/epubjs@0.3.93/dist/epub.min.js"></script>
     <script src="./data/library-data.js"></script>
     <script src="./app.js"></script>
   </body>
